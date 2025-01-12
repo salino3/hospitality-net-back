@@ -1,5 +1,5 @@
 {
-  "name": "culinary-net-back",
+  "name": "hospitality-net-back",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -8,5 +8,18 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.12.0",
+    "nodemon": "^3.1.9"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
 }
