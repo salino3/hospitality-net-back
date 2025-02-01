@@ -2,6 +2,8 @@ const { db } = require("../db");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
+const account_typeAllowed = ["individual", "business"];
+
 const getAccounts = async (req, res) => {
   const dbName = process.env.DB_NAME;
 
@@ -132,8 +134,17 @@ const getAccountsByEmail = async (req, res) => {
 
 const updateAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  const accountId = req.id;
-  const { username, full_name, email, age, bio, role_description } = req.body;
+  //   const accountId = req.params.id;
+  const accountId = req.params.id;
+  const {
+    username,
+    full_name,
+    email,
+    age,
+    bio,
+    role_description,
+    account_type,
+  } = req.body;
 
   try {
     const [existingAccount] = await db
@@ -189,10 +200,19 @@ const updateAccount = async (req, res) => {
       valuesToUpdate.push(role_description);
     }
 
+    if (account_type && account_type !== existingAccount[0]?.account_type) {
+      if (!account_typeAllowed.includes(account_type)) {
+        return res.status(400).send({ message: "Invalid account type." });
+      }
+      fieldsToUpdate.push("account_type = ?");
+      valuesToUpdate.push(account_type);
+    }
+
     if (req.file) {
       // req.file.filename contains the name of the saved file
       fieldsToUpdate.push("profile_picture = ?");
-      valuesToUpdate.push(req.file.filename);
+      console.log("fields", req.file.filename);
+      valuesToUpdate.push(`uploads/profile_pictures/${req.file.filename}`);
     }
 
     if (fieldsToUpdate.length === 0) {
@@ -242,7 +262,9 @@ const changePasswordAccount = async (req, res) => {
     //
     const [account] = await db
       .promise()
-      .query(`SELECT * FROM \`${dbName}\`.accounts WHERE id = ?`, [accountId]);
+      .query(`SELECT * FROM \`${dbName}\`.accounts WHERE account_id  = ?`, [
+        accountId,
+      ]);
     if (account.length === 0) {
       return res.status(404).send({ message: "Account not found." });
     }
@@ -259,10 +281,10 @@ const changePasswordAccount = async (req, res) => {
 
     const [result] = await db
       .promise()
-      .query(`UPDATE \`${dbName}\`.accounts SET password = ? WHERE id = ?`, [
-        hashedPassword,
-        accountId,
-      ]);
+      .query(
+        `UPDATE \`${dbName}\`.accounts SET password = ? WHERE account_id  = ?`,
+        [hashedPassword, accountId]
+      );
 
     if (result.affectedRows > 0) {
       return res
@@ -282,7 +304,9 @@ const deleteAccount = async (req, res) => {
   try {
     const [result] = await db
       .promise()
-      .query(`DELETE FROM \`${dbName}\`.accounts WHERE id = (?)`, [userId]);
+      .query(`DELETE FROM \`${dbName}\`.accounts WHERE account_id  = (?)`, [
+        userId,
+      ]);
     if (result.affectedRows > 0) {
       return res.status(200).send("Account deleted successfully.");
     } else {
