@@ -154,6 +154,12 @@ const updateAccount = async (req, res) => {
       valuesToUpdate.push(role_description);
     }
 
+    if (req.file) {
+      // req.file.filename contains the name of the saved file
+      fieldsToUpdate.push("profile_picture = ?");
+      valuesToUpdate.push(req.file.filename);
+    }
+
     if (fieldsToUpdate.length === 0) {
       return res.status(400).send({
         message: "No valid fields provided to update, or no changes detected",
@@ -179,9 +185,86 @@ const updateAccount = async (req, res) => {
   }
 };
 
+const changePasswordAccount = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  const accountId = req.params.id;
+  const { password, newPassword } = req.body;
+
+  try {
+    if (!newPassword) {
+      return res.status(400).send({ message: "New password is required." });
+    }
+    if (!password) {
+      return res.status(400).send({ message: "Old password is required." });
+    }
+
+    if (password === newPassword) {
+      return res.status(400).send({
+        message: "New password should be different from old password.",
+      });
+    }
+
+    //
+    const [account] = await db
+      .promise()
+      .query(`SELECT * FROM \`${dbName}\`.accounts WHERE id = ?`, [accountId]);
+    if (account.length === 0) {
+      return res.status(404).send({ message: "Account not found." });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      account[0]?.password
+    );
+    if (!isPasswordValid) {
+      return res.status(400).send({ message: "Old password is incorrect." });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const [result] = await db
+      .promise()
+      .query(`UPDATE \`${dbName}\`.accounts SET password = ? WHERE id = ?`, [
+        hashedPassword,
+        accountId,
+      ]);
+
+    if (result.affectedRows > 0) {
+      return res
+        .status(200)
+        .send({ message: "Password updated successfully." });
+    } else {
+      return res.status(404).send({ message: "Account not found." });
+    }
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+};
+
+const deleteAccount = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  const userId = req.params.id;
+  try {
+    const [result] = await db
+      .promise()
+      .query(`DELETE FROM \`${dbName}\`.accounts WHERE id = (?)`, [userId]);
+    if (result.affectedRows > 0) {
+      return res.status(200).send("Account deleted successfully.");
+    } else {
+      return res.status(404).send("Account not found.");
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send(error);
+  }
+};
+
 module.exports = {
   getAccounts,
   getBatchAccounts,
   getAccountById,
   getAccountsByEmail,
+  updateAccount,
+  changePasswordAccount,
+  deleteAccount,
 };

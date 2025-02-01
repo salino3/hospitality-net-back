@@ -1,5 +1,6 @@
 const express = require("express");
 const accountsControllers = require("../controllers/accounts.controllers");
+const upload = require("../middlewares/multerConfig");
 
 const routerAccounts = express.Router();
 
@@ -11,10 +12,14 @@ routerAccounts.get("/:id", accountsControllers.getAccountById);
 
 routerAccounts.get("/email/:email", accountsControllers.getAccountsByEmail);
 
-routerAccounts.put("/:id", {});
+routerAccounts.put(
+  "/:id",
+  upload.single("profile_picture"),
+  accountsControllers.updateAccount
+);
 
-routerAccounts.patch("/:id", {});
+routerAccounts.patch("/:id", accountsControllers.changePasswordAccount);
 
-routerAccounts.delete("/:id", {});
+routerAccounts.delete("/:id", accountsControllers.deleteAccount);
 
 module.exports = routerAccounts;
