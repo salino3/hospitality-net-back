@@ -154,6 +154,12 @@ const updateAccount = async (req, res) => {
       valuesToUpdate.push(role_description);
     }
 
+    if (req.file) {
+      // req.file.filename contains the name of the saved file
+      fieldsToUpdate.push("profile_picture = ?");
+      valuesToUpdate.push(req.file.filename);
+    }
+
     if (fieldsToUpdate.length === 0) {
       return res.status(400).send({
         message: "No valid fields provided to update, or no changes detected",
@@ -184,4 +190,5 @@ module.exports = {
   getBatchAccounts,
   getAccountById,
   getAccountsByEmail,
+  updateAccount,
 };
