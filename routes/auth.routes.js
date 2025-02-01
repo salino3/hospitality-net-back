@@ -5,6 +5,6 @@ const routerAuth = express.Router();
 
 routerAuth.post("/accounts/register", authController?.registerAccount);
 
-// routerAuth.post("/accounts/login", authController.loginAccount);
+routerAuth.post("/accounts/login", authController.loginAccount);
 
 module.exports = routerAuth;

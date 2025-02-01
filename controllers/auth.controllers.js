@@ -93,62 +93,50 @@ const registerAccount = async (req, res) => {
   });
 };
 
-module.exports = { registerAccount };
+const loginAccount = async (req, res) => {
+  const { email, password } = req.body;
 
-// const registerAccount = async (req, res) => {
-//   const {
-//     account_type,
-//     profile_picture,
-//     username,
-//     full_name,
-//     email,
-//     password,
-//     age,
-//     bio,
-//     role_description,
-//   } = req.body;
+  db.promise()
+    .query("SELECT * FROM accounts WHERE email = (?)", [email])
+    .then((result) => {
+      if (result[0].length === 0) {
+        return res.status(404).send("Email not found");
+      }
 
-//   await db
-//     .promise()
-//     .query("SELECT email FROM accounts WHERE email = (?)", [email])
-//     .then((result) => {
-//       if (result[0].length > 0) {
-//         return res.send("This email is already in use");
-//       } else if (age < 18) {
-//         return res.send("You must be at least 18 years old");
-//       } else if (password !== passwordConfirm) {
-//         if (password?.length < 6 || passwordConfirm?.length < 6) {
-//           return res.send("Password should be at least 6 characters long");
-//         }
-//         return res.send("Password and confirm password do not match");
-//       }
+      const user = result[0][0];
+      const isPasswordValid = bcrypt.compareSync(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).send("Invalid password");
+      }
 
-//       const hashedPassword = bcrypt.hashSync(password, 10);
+      // Generate token
+      const token = jwt.sign(
+        { account_id: user.account_id, email: user.email },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: "1h",
+        }
+      );
 
-//       return db
-//         .promise()
-//         .query("INSERT INTO accounts SET ?", {
-//           account_type: account_type ? account_type : "individual",
-//           profile_picture,
-//           username,
-//           full_name,
-//           email,
-//           password,
-//           age,
-//           bio,
-//           role_description,
-//           password: hashedPassword,
-//         })
-//         .then(() => {
-//           return res.send("User registered successfully");
-//         })
-//         .catch((err) => {
-//           console.error(err);
-//           return res.send("Error registering user");
-//         });
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//       return res.status(500).send("Error checking email");
-//     });
-// };
+      const generateRandomNumber = () => {
+        return Math.floor(1000 + Math.random() * 9000);
+      };
+
+      res.cookie("auth_token_" + generateRandomNumber(), token, {
+        httpOnly: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+        expires: new Date(Date.now() + 3600 * 1000),
+      });
+
+      return res.json({
+        message: "Login successful",
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).send("Error during login");
+    });
+};
+
+module.exports = { registerAccount, loginAccount };
