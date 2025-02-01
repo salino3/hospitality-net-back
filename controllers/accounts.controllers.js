@@ -14,7 +14,15 @@ const getAccounts = async (req, res) => {
       return res.status(404).send("No users found.");
     }
 
-    const accounts = result[0].map(({ password, ...account }) => account);
+    const accounts = result[0].map(({ password, ...account }) => {
+      if (account.profile_picture) {
+        account.profile_picture = `${req.protocol}://${req.get(
+          "host"
+        )}/${account.profile_picture.replace(/\\/g, "/")}`;
+      }
+      return account;
+    });
+
     return res.status(200).send(accounts);
   } catch (error) {
     console.error(error);

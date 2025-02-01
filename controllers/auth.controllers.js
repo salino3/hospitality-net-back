@@ -35,11 +35,11 @@ const registerAccount = async (req, res) => {
       passwordConfirm,
     } = req.body;
 
-    // Comprobar si se subió una imagen
+    // Check if the image is uploaded
     const profile_picture = req.file ? req.file.path : null;
 
     if (req.file) {
-      console.log("Image uploaded:", req.file.path); // Para depuración
+      console.log("Image uploaded:", req.file.path);
     }
 
     await db
@@ -67,7 +67,7 @@ const registerAccount = async (req, res) => {
           .promise()
           .query("INSERT INTO accounts SET ?", {
             account_type: account_type || "individual",
-            profile_picture, // Ruta de la imagen
+            profile_picture,
             username,
             full_name,
             email,
