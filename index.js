@@ -2,12 +2,16 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const routerAuth = require("./routes/auth.routes");
 const routerAccounts = require("./routes/accounts.routes");
+const path = require("path");
 
 dotenv.config();
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
+// Serve static files (images, CSS, etc.)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const port = process.env.PORT || 5300;
 
@@ -22,6 +26,7 @@ app.use(
 );
 
 // Routes
+app.use("/auth", routerAuth);
 app.use("/accounts", routerAccounts);
 
 //
