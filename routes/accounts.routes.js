@@ -1,14 +1,15 @@
 const express = require("express");
+const accountsControllers = require("../controllers/accounts.controllers");
 
 const routerAccounts = express.Router();
 
-routerAccounts.get("/", function (req, res) {});
+routerAccounts.get("/", accountsControllers?.getAccounts);
 
-routerAccounts.get("/batch/get", () => {});
+routerAccounts.get("/batch/get", accountsControllers.getBatchAccounts);
 
-routerAccounts.get("/:id", () => {});
+routerAccounts.get("/:id", accountsControllers.getAccountById);
 
-routerAccounts.get("/email/:email", () => {});
+routerAccounts.get("/email/:email", accountsControllers.getAccountsByEmail);
 
 routerAccounts.put("/:id", {});
 
