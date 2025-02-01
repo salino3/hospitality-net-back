@@ -47,6 +47,14 @@ const getBatchAccounts = async (req, res) => {
       return res.status(400).send("Invalid limit or offset values.");
     }
 
+    if (Math.abs(parsedLimit - parsedOffset) > 10) {
+      return res
+        .status(400)
+        .send(
+          "The difference between limit and offset cannot be greater than 10."
+        );
+    }
+
     // 'offset 10' starts returning index 10, it is eleventh account in the list
     const query = `
         SELECT * FROM \`${dbName}\`.accounts
@@ -57,7 +65,14 @@ const getBatchAccounts = async (req, res) => {
       return res.status(404).send("No account found.");
     }
 
-    const accounts = result[0].map(({ password, ...account }) => account);
+    const accounts = result[0].map(({ password, ...account }) => {
+      if (account.profile_picture) {
+        account.profile_picture = `${req.protocol}://${req.get(
+          "host"
+        )}/${account.profile_picture.replace(/\\/g, "/")}`;
+      }
+      return account;
+    });
     return res.status(200).send(accounts);
   } catch (error) {
     console.error(error);
@@ -77,6 +92,12 @@ const getAccountById = async (req, res) => {
       return res.status(404).send("User not found.");
     }
     const { password, ...account } = result[0][0];
+    // If profile_picture exists, generate the full URL
+    if (account.profile_picture) {
+      account.profile_picture = `${req.protocol}://${req.get(
+        "host"
+      )}/${account.profile_picture.replace(/\\/g, "/")}`;
+    }
 
     return res.status(200).send(account);
   } catch (error) {
@@ -96,8 +117,14 @@ const getAccountsByEmail = async (req, res) => {
       return res.status(404).send("Account not found.");
     }
 
-    const { password, ...user } = result[0][0];
-    return res.status(200).send(user);
+    const { password, ...account } = result[0][0];
+    // If profile_picture exists, generate the full URL
+    if (account.profile_picture) {
+      account.profile_picture = `${req.protocol}://${req.get(
+        "host"
+      )}/${account.profile_picture.replace(/\\/g, "/")}`;
+    }
+    return res.status(200).send(account);
   } catch (error) {
     return res.status(500).send(error);
   }
