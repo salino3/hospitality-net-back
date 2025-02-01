@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const { db } = require("./db");
+const routerAccounts = require("./routes/accounts.routes");
 
 dotenv.config();
 const app = express();
@@ -20,6 +20,9 @@ app.use(
     credentials: true,
   })
 );
+
+// Routes
+app.use("/accounts", routerAccounts);
 
 //
 if (process.env.NODE_ENV === "production") {
