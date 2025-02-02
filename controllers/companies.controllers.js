@@ -290,6 +290,26 @@ const updateCompany = async (req, res) => {
   }
 };
 
+const deleteCompany = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  const companyId = req.params.id;
+  try {
+    const [result] = await db
+      .promise()
+      .query(`DELETE FROM \`${dbName}\`.companies WHERE company_id = (?)`, [
+        companyId,
+      ]);
+    if (result.affectedRows > 0) {
+      return res.status(200).send("Company deleted successfully.");
+    } else {
+      return res.status(404).send("Company not found.");
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send(error);
+  }
+};
+
 module.exports = {
   createCompany,
   getCompanies,
@@ -297,4 +317,5 @@ module.exports = {
   getCompanyById,
   getCompanyByEmail,
   updateCompany,
+  deleteCompany,
 };

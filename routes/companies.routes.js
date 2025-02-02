@@ -20,4 +20,6 @@ routerCompanies.put(
   companiesController.updateCompany
 );
 
+routerCompanies.delete("/:id", companiesController.deleteCompany);
+
 module.exports = routerCompanies;

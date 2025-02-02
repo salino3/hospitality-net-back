@@ -309,7 +309,7 @@ const deleteAccount = async (req, res) => {
   try {
     const [result] = await db
       .promise()
-      .query(`DELETE FROM \`${dbName}\`.accounts WHERE account_id  = (?)`, [
+      .query(`DELETE FROM \`${dbName}\`.accounts WHERE account_id = (?)`, [
         userId,
       ]);
     if (result.affectedRows > 0) {
