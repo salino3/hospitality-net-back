@@ -234,7 +234,6 @@ const updateAccount = async (req, res) => {
     const [result] = await db.promise().query(sqlQuery, valuesToUpdate);
 
     if (result.affectedRows > 0) {
-      errorImage(req.file ? req.file.path : null);
       return res.status(200).send({ message: "Account updated successfully." });
     } else {
       errorImage(req.file ? req.file.path : null);
