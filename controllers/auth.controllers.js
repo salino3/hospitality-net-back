@@ -2,22 +2,10 @@ const { db } = require("../db");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const upload = require("../middlewares/multerConfig");
-const fs = require("fs");
+const { errorImage } = require("../utils/functions");
 require("dotenv").config();
 
 const registerAccount = async (req, res) => {
-  const errorImage = (profile_picture) => {
-    if (profile_picture) {
-      fs.unlink(profile_picture, (unlinkErr) => {
-        if (unlinkErr) {
-          console.error("Error deleting the image:", unlinkErr);
-        } else {
-          console.log("The image was deleted successfully");
-        }
-      });
-    }
-  };
-
   upload.single("profile_picture")(req, res, async (err) => {
     if (err) {
       return res.status(400).send("Error at upoading image: " + err.message);

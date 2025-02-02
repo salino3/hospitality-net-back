@@ -1,5 +1,6 @@
 const { db } = require("../db");
 const bcrypt = require("bcryptjs");
+const { errorImage } = require("../utils/functions");
 require("dotenv").config();
 
 const account_typeAllowed = ["individual", "business"];
@@ -156,6 +157,7 @@ const updateAccount = async (req, res) => {
       existingAccount[0]?.email === email &&
       accountId != existingAccount[0].account_id
     ) {
+      errorImage(req.file ? req.file.path : null);
       return res.status(400).send({ message: "Email is already in use." });
     }
 
@@ -202,6 +204,7 @@ const updateAccount = async (req, res) => {
 
     if (account_type && account_type !== existingAccount[0]?.account_type) {
       if (!account_typeAllowed.includes(account_type)) {
+        errorImage(req.file ? req.file.path : null);
         return res.status(400).send({ message: "Invalid account type." });
       }
       fieldsToUpdate.push("account_type = ?");
@@ -216,6 +219,7 @@ const updateAccount = async (req, res) => {
     }
 
     if (fieldsToUpdate.length === 0) {
+      errorImage(req.file ? req.file.path : null);
       return res.status(400).send({
         message: "No valid fields provided to update, or no changes detected",
       });
@@ -232,10 +236,12 @@ const updateAccount = async (req, res) => {
     if (result.affectedRows > 0) {
       return res.status(200).send({ message: "Account updated successfully." });
     } else {
+      errorImage(req.file ? req.file.path : null);
       return res.status(404).send({ message: "Account not found." });
     }
   } catch (error) {
     console.error(error);
+    errorImage(req.file ? req.file.path : null);
     return res.status(500).send(error);
   }
 };
