@@ -65,7 +65,7 @@ const getBatchAccounts = async (req, res) => {
     const result = await db.promise().query(query, [parsedLimit, parsedOffset]);
 
     if (result[0]?.length === 0) {
-      return res.status(404).send("No account found.");
+      return res.status(404).send("No accounts found.");
     }
 
     const accounts = result[0].map(({ password, ...account }) => {
