@@ -1,12 +1,12 @@
 const { db } = require("../db");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const upload = require("../middlewares/multerConfig");
+const { customUpload } = require("../middlewares/multerConfig");
 const { errorImage } = require("../utils/functions");
 require("dotenv").config();
 
 const registerAccount = async (req, res) => {
-  upload.single("profile_picture")(req, res, async (err) => {
+  customUpload("profile_pictures", "profile_picture")(req, res, async (err) => {
     if (err) {
       return res.status(400).send("Error at upolading image: " + err.message);
     }
