@@ -13,11 +13,11 @@ const getCompanies = async (req, res) => {
       return res.status(404).send("No companies found.");
     }
 
-    const companies = result[0].map(({ password, ...companies }) => {
-      if (companies.profile_picture) {
-        companies.profile_picture = `${req.protocol}://${req.get(
+    const companies = result[0].map((companies) => {
+      if (companies.logo) {
+        companies.logo = `${req.protocol}://${req.get(
           "host"
-        )}/${companies.profile_picture.replace(/\\/g, "/")}`;
+        )}/${companies.logo.replace(/\\/g, "/")}`;
       }
       return companies;
     });
@@ -64,11 +64,11 @@ const getBatchCompanies = async (req, res) => {
       return res.status(404).send("No companies found.");
     }
 
-    const companies = result[0].map(({ password, ...company }) => {
-      if (company.profile_picture) {
-        company.profile_picture = `${req.protocol}://${req.get(
+    const companies = result[0].map((company) => {
+      if (company.logo) {
+        company.logo = `${req.protocol}://${req.get(
           "host"
-        )}/${company.profile_picture.replace(/\\/g, "/")}`;
+        )}/${company.logo.replace(/\\/g, "/")}`;
       }
       return company;
     });
@@ -79,4 +79,62 @@ const getBatchCompanies = async (req, res) => {
   }
 };
 
-module.exports = { getCompanies, getBatchCompanies };
+const getCompanyById = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  const { id } = req.params;
+  try {
+    const result = await db
+      .promise()
+      .query(
+        `SELECT * FROM \`${dbName}\`.companies WHERE account_id = (?)`,
+        id
+      );
+
+    if (result[0]?.length === 0) {
+      return res.status(404).send("Company not found.");
+    }
+    const company = result[0][0];
+    // If logo exists, generate the full URL
+    if (company.logo) {
+      company.logo = `${req.protocol}://${req.get(
+        "host"
+      )}/${company.logo.replace(/\\/g, "/")}`;
+    }
+
+    return res.status(200).send(company);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+};
+
+const getCompanyByEmail = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  const { email } = req.params;
+  try {
+    const result = await db
+      .promise()
+      .query(`SELECT * FROM \`${dbName}\`.company WHERE email = (?)`, email);
+
+    if (result[0]?.length === 0) {
+      return res.status(404).send("Company not found.");
+    }
+
+    const company = result[0][0];
+    // If logo exists, generate the full URL
+    if (company.logo) {
+      company.logo = `${req.protocol}://${req.get(
+        "host"
+      )}/${company.logo.replace(/\\/g, "/")}`;
+    }
+    return res.status(200).send(company);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+};
+
+module.exports = {
+  getCompanies,
+  getBatchCompanies,
+  getCompanyById,
+  getCompanyByEmail,
+};

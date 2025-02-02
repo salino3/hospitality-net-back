@@ -108,7 +108,7 @@ const getAccountById = async (req, res) => {
   }
 };
 
-const getAccountsByEmail = async (req, res) => {
+const getAccountByEmail = async (req, res) => {
   const dbName = process.env.DB_NAME;
   const { email } = req.params;
   try {
@@ -328,7 +328,7 @@ module.exports = {
   getAccounts,
   getBatchAccounts,
   getAccountById,
-  getAccountsByEmail,
+  getAccountByEmail,
   updateAccount,
   changePasswordAccount,
   deleteAccount,

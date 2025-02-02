@@ -10,7 +10,7 @@ routerAccounts.get("/batch/get", accountsControllers.getBatchAccounts);
 
 routerAccounts.get("/:id", accountsControllers.getAccountById);
 
-routerAccounts.get("/email/:email", accountsControllers.getAccountsByEmail);
+routerAccounts.get("/email/:email", accountsControllers.getAccountByEmail);
 
 routerAccounts.put(
   "/:id",
