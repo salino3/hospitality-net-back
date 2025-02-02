@@ -8,7 +8,7 @@ require("dotenv").config();
 const registerAccount = async (req, res) => {
   upload.single("profile_picture")(req, res, async (err) => {
     if (err) {
-      return res.status(400).send("Error at upoading image: " + err.message);
+      return res.status(400).send("Error at upolading image: " + err.message);
     }
 
     const {

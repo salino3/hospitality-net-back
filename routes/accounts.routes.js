@@ -1,6 +1,6 @@
 const express = require("express");
 const accountsControllers = require("../controllers/accounts.controllers");
-const upload = require("../middlewares/multerConfig");
+const { upload } = require("../middlewares/multerConfig");
 
 const routerAccounts = express.Router();
 

@@ -1,5 +1,64 @@
 const { db } = require("../db");
+const { customUpload } = require("../middlewares/multerConfig");
+const { errorImage } = require("../utils/functions");
 require("dotenv").config();
+
+const createCompany = async (req, res) => {
+  customUpload("logo_pictures", "logo")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).send("Error at upolading image: " + err.message);
+    }
+
+    const {
+      company_name,
+      company_description,
+      contact_email,
+      contact_phone,
+      website_url,
+      address,
+      country,
+    } = req.body;
+
+    // Check if the image is uploaded
+    const logo = req.file ? req.file.path : null;
+
+    if (req.file) {
+      console.log("Image uploaded:", req.file.path);
+    }
+
+    if (!company_name) {
+      errorImage(logo);
+      return res.status(400).send("Company name is required");
+    }
+
+    if (!contact_email) {
+      errorImage(logo);
+      return res.status(400).send("Company email is required");
+    }
+
+    await db
+      .promise()
+      .query("INSERT INTO companies SET ?", {
+        company_name,
+        company_description,
+        logo,
+        contact_email,
+        contact_phone,
+        website_url,
+        address,
+        country,
+      })
+      .then(() => {
+        return res.send("Account registered successfully");
+      })
+
+      .catch((err) => {
+        console.error(err);
+        errorImage(logo);
+        return res.status(500).send("Error registering company");
+      });
+  });
+};
 
 const getCompanies = async (req, res) => {
   const dbName = process.env.DB_NAME;
@@ -86,7 +145,7 @@ const getCompanyById = async (req, res) => {
     const result = await db
       .promise()
       .query(
-        `SELECT * FROM \`${dbName}\`.companies WHERE account_id = (?)`,
+        `SELECT * FROM \`${dbName}\`.companies WHERE company_id = (?)`,
         id
       );
 
@@ -113,7 +172,10 @@ const getCompanyByEmail = async (req, res) => {
   try {
     const result = await db
       .promise()
-      .query(`SELECT * FROM \`${dbName}\`.company WHERE email = (?)`, email);
+      .query(
+        `SELECT * FROM \`${dbName}\`.company WHERE contact_email = (?)`,
+        email
+      );
 
     if (result[0]?.length === 0) {
       return res.status(404).send("Company not found.");
@@ -133,6 +195,7 @@ const getCompanyByEmail = async (req, res) => {
 };
 
 module.exports = {
+  createCompany,
   getCompanies,
   getBatchCompanies,
   getCompanyById,
