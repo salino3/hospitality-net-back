@@ -135,7 +135,7 @@ const getAccountByEmail = async (req, res) => {
 
 const updateAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  //   const accountId = req.params.id;
+  //   const accountId = req.id;
   const accountId = req.params.id;
   const {
     username,
@@ -214,7 +214,6 @@ const updateAccount = async (req, res) => {
     if (req.file) {
       // req.file.filename contains the name of the saved file
       fieldsToUpdate.push("profile_picture = ?");
-      console.log("fields", req.file.filename);
       valuesToUpdate.push(`uploads/profile_pictures/${req.file.filename}`);
     }
 

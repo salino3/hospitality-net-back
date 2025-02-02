@@ -194,10 +194,107 @@ const getCompanyByEmail = async (req, res) => {
   }
 };
 
+const updateCompany = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  //   const companyId = req.id;
+  const companyId = req.params.id;
+  const {
+    company_name,
+    company_description,
+    contact_email,
+    contact_phone,
+    website_url,
+    address,
+    country,
+  } = req.body;
+
+  try {
+    const [existingAccount] = await db
+      .promise()
+      .query(`SELECT * FROM \`${dbName}\`.companies WHERE company_id = ?`, [
+        companyId,
+      ]);
+
+    const fieldsToUpdate = [];
+    const valuesToUpdate = [];
+
+    if (company_name && company_name !== existingAccount[0]?.company_name) {
+      fieldsToUpdate.push("company_name = ?");
+      valuesToUpdate.push(company_name);
+    }
+
+    if (
+      company_description &&
+      company_description !== existingAccount[0]?.company_description
+    ) {
+      fieldsToUpdate.push("company_description = ?");
+      valuesToUpdate.push(company_description);
+    }
+
+    if (contact_email && contact_email !== existingAccount[0]?.contact_email) {
+      fieldsToUpdate.push("contact_email = ?");
+      valuesToUpdate.push(contact_email);
+    }
+
+    if (contact_phone && contact_phone !== existingAccount[0]?.contact_phone) {
+      fieldsToUpdate.push("contact_phone = ?");
+      valuesToUpdate.push(contact_phone);
+    }
+
+    if (website_url && website_url !== existingAccount[0]?.website_url) {
+      fieldsToUpdate.push("website_url = ?");
+      valuesToUpdate.push(website_url);
+    }
+
+    if (address && address !== existingAccount[0]?.address) {
+      fieldsToUpdate.push("address = ?");
+      valuesToUpdate.push(address);
+    }
+
+    if (country && country !== existingAccount[0]?.country) {
+      fieldsToUpdate.push("country = ?");
+      valuesToUpdate.push(country);
+    }
+
+    if (req.file) {
+      // req.file.filename contains the name of the saved file
+      fieldsToUpdate.push("logo = ?");
+      valuesToUpdate.push(`uploads/logo_pictures/${req.file.filename}`);
+    }
+
+    if (fieldsToUpdate.length === 0) {
+      errorImage(req.file ? req.file.path : null);
+      return res.status(400).send({
+        message: "No valid fields provided to update, or no changes detected",
+      });
+    }
+
+    valuesToUpdate.push(companyId);
+
+    const sqlQuery = `UPDATE \`${dbName}\`.companies SET ${fieldsToUpdate.join(
+      ", "
+    )} WHERE company_id = ?`;
+
+    const [result] = await db.promise().query(sqlQuery, valuesToUpdate);
+
+    if (result.affectedRows > 0) {
+      return res.status(200).send({ message: "Company updated successfully." });
+    } else {
+      errorImage(req.file ? req.file.path : null);
+      return res.status(404).send({ message: "Company not found." });
+    }
+  } catch (error) {
+    console.error(error);
+    errorImage(req.file ? req.file.path : null);
+    return res.status(500).send(error);
+  }
+};
+
 module.exports = {
   createCompany,
   getCompanies,
   getBatchCompanies,
   getCompanyById,
   getCompanyByEmail,
+  updateCompany,
 };

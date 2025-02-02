@@ -1,5 +1,6 @@
 const express = require("express");
 const companiesController = require("../controllers/companies.controllers");
+const { customUpload } = require("../middlewares/multerConfig");
 
 const routerCompanies = express.Router();
 
@@ -12,5 +13,11 @@ routerCompanies.get("/batch/get", companiesController.getBatchCompanies);
 routerCompanies.get("/:id", companiesController?.getCompanyById);
 
 routerCompanies.get("/email/:email", companiesController.getCompanyByEmail);
+
+routerCompanies.put(
+  "/:id",
+  customUpload("logo_pictures", "logo"),
+  companiesController.updateCompany
+);
 
 module.exports = routerCompanies;
