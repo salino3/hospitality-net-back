@@ -1,7 +1,7 @@
 const { db } = require("../db");
 require("dotenv").config();
 
-export const getCompanies = async () => {
+const getCompanies = async (req, res) => {
   const dbName = process.env.DB_NAME;
 
   try {

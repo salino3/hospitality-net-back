@@ -4,4 +4,8 @@ const upload = require("../middlewares/multerConfig");
 
 const routerCompanies = express.Router();
 
-routerCompanies.get("/", companiesController.getCompanies);
+routerCompanies.get("/", companiesController?.getCompanies);
+
+// routerCompanies.get("/batch/get", companiesController.getBatchAccounts);
+
+module.exports = routerCompanies;
