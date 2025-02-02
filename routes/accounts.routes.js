@@ -1,6 +1,6 @@
 const express = require("express");
 const accountsControllers = require("../controllers/accounts.controllers");
-const upload = require("../middlewares/multerConfig");
+const { customUpload } = require("../middlewares/multerConfig");
 
 const routerAccounts = express.Router();
 
@@ -10,11 +10,11 @@ routerAccounts.get("/batch/get", accountsControllers.getBatchAccounts);
 
 routerAccounts.get("/:id", accountsControllers.getAccountById);
 
-routerAccounts.get("/email/:email", accountsControllers.getAccountsByEmail);
+routerAccounts.get("/email/:email", accountsControllers.getAccountByEmail);
 
 routerAccounts.put(
   "/:id",
-  upload.single("profile_picture"),
+  customUpload("profile_pictures", "profile_picture"),
   accountsControllers.updateAccount
 );
 

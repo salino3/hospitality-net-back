@@ -4,6 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const routerAuth = require("./routes/auth.routes");
 const routerAccounts = require("./routes/accounts.routes");
+const routerCompanies = require("./routes/companies.routes");
 const path = require("path");
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use(
 // Routes
 app.use("/auth", routerAuth);
 app.use("/accounts", routerAccounts);
+app.use("/companies", routerCompanies);
 
 //
 if (process.env.NODE_ENV === "production") {

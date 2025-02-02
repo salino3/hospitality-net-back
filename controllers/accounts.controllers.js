@@ -65,7 +65,7 @@ const getBatchAccounts = async (req, res) => {
     const result = await db.promise().query(query, [parsedLimit, parsedOffset]);
 
     if (result[0]?.length === 0) {
-      return res.status(404).send("No account found.");
+      return res.status(404).send("No accounts found.");
     }
 
     const accounts = result[0].map(({ password, ...account }) => {
@@ -108,7 +108,7 @@ const getAccountById = async (req, res) => {
   }
 };
 
-const getAccountsByEmail = async (req, res) => {
+const getAccountByEmail = async (req, res) => {
   const dbName = process.env.DB_NAME;
   const { email } = req.params;
   try {
@@ -135,7 +135,7 @@ const getAccountsByEmail = async (req, res) => {
 
 const updateAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  //   const accountId = req.params.id;
+  //   const accountId = req.id;
   const accountId = req.params.id;
   const {
     username,
@@ -214,7 +214,6 @@ const updateAccount = async (req, res) => {
     if (req.file) {
       // req.file.filename contains the name of the saved file
       fieldsToUpdate.push("profile_picture = ?");
-      console.log("fields", req.file.filename);
       valuesToUpdate.push(`uploads/profile_pictures/${req.file.filename}`);
     }
 
@@ -310,7 +309,7 @@ const deleteAccount = async (req, res) => {
   try {
     const [result] = await db
       .promise()
-      .query(`DELETE FROM \`${dbName}\`.accounts WHERE account_id  = (?)`, [
+      .query(`DELETE FROM \`${dbName}\`.accounts WHERE account_id = (?)`, [
         userId,
       ]);
     if (result.affectedRows > 0) {
@@ -328,7 +327,7 @@ module.exports = {
   getAccounts,
   getBatchAccounts,
   getAccountById,
-  getAccountsByEmail,
+  getAccountByEmail,
   updateAccount,
   changePasswordAccount,
   deleteAccount,
