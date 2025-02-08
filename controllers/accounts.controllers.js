@@ -135,8 +135,8 @@ const getAccountByEmail = async (req, res) => {
 
 const updateAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  //   const accountId = req.id;
-  const accountId = req.params.id;
+  const accountId = req.id;
+  // const accountId = req.params.id;
   const {
     username,
     full_name,
@@ -254,7 +254,7 @@ const updateAccount = async (req, res) => {
 
 const changePasswordAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  const accountId = req.params.id;
+  const accountId = req.id;
   const { password, newPassword } = req.body;
 
   try {
@@ -313,7 +313,7 @@ const changePasswordAccount = async (req, res) => {
 
 const removeAccountFromWeb = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  const accountId = req.params.id;
+  const accountId = req.id;
 
   try {
     const [result] = await db.promise().query(

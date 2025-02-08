@@ -99,7 +99,11 @@ const loginAccount = async (req, res) => {
 
       // Generate token
       const token = jwt.sign(
-        { account_id: user.account_id, email: user.email },
+        {
+          id: user.account_id,
+          email: user.email,
+          role_user: user.role_user,
+        },
         process.env.SECRET_KEY,
         {
           expiresIn: "1h",
