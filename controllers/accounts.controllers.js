@@ -11,7 +11,7 @@ const getAccounts = async (req, res) => {
   try {
     const result = await db
       .promise()
-      .query(`SELECT * FROM \`${dbName}\`.accounts`);
+      .query(`SELECT * FROM \`${dbName}\`.accounts WHERE is_active = 1`);
 
     if (result[0]?.length === 0) {
       return res.status(404).send("No users found.");
@@ -60,7 +60,7 @@ const getBatchAccounts = async (req, res) => {
 
     // 'offset 10' starts returning index 10, it is eleventh account in the list
     const query = `
-        SELECT * FROM \`${dbName}\`.accounts
+        SELECT * FROM \`${dbName}\`.accounts WHERE is_active = 1
         LIMIT ? OFFSET ?`;
     const result = await db.promise().query(query, [parsedLimit, parsedOffset]);
 
@@ -91,7 +91,7 @@ const getAccountById = async (req, res) => {
       .promise()
       .query(`SELECT * FROM \`${dbName}\`.accounts WHERE account_id = (?)`, id);
 
-    if (result[0]?.length === 0) {
+    if (result[0]?.length === 0 || result[0][0]?.is_active === 0) {
       return res.status(404).send("User not found.");
     }
     const { password, ...account } = result[0][0];
@@ -116,7 +116,7 @@ const getAccountByEmail = async (req, res) => {
       .promise()
       .query(`SELECT * FROM \`${dbName}\`.accounts WHERE email = (?)`, email);
 
-    if (result[0]?.length === 0) {
+    if (result[0]?.length === 0 || result[0][0]?.is_active === 0) {
       return res.status(404).send("Account not found.");
     }
 
@@ -135,8 +135,8 @@ const getAccountByEmail = async (req, res) => {
 
 const updateAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  //   const accountId = req.id;
-  const accountId = req.params.id;
+  const accountId = req.id;
+  // const accountId = req.params.id;
   const {
     username,
     full_name,
@@ -150,7 +150,14 @@ const updateAccount = async (req, res) => {
   try {
     const [existingAccount] = await db
       .promise()
-      .query(`SELECT * FROM \`${dbName}\`.accounts WHERE email = ?`, [email]);
+      .query(
+        `SELECT * FROM \`${dbName}\`.accounts WHERE email = ? AND is_active = 1`,
+        [email]
+      );
+
+    if (email && !existingAccount[0]) {
+      return res.status(404).send("Account not found.");
+    }
 
     if (
       existingAccount[0] &&
@@ -228,7 +235,7 @@ const updateAccount = async (req, res) => {
 
     const sqlQuery = `UPDATE \`${dbName}\`.accounts SET ${fieldsToUpdate.join(
       ", "
-    )} WHERE account_id = ?`;
+    )} WHERE account_id = ? AND is_active = 1`;
 
     const [result] = await db.promise().query(sqlQuery, valuesToUpdate);
 
@@ -247,7 +254,7 @@ const updateAccount = async (req, res) => {
 
 const changePasswordAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
-  const accountId = req.params.id;
+  const accountId = req.id;
   const { password, newPassword } = req.body;
 
   try {
@@ -267,9 +274,10 @@ const changePasswordAccount = async (req, res) => {
     //
     const [account] = await db
       .promise()
-      .query(`SELECT * FROM \`${dbName}\`.accounts WHERE account_id  = ?`, [
-        accountId,
-      ]);
+      .query(
+        `SELECT * FROM \`${dbName}\`.accounts WHERE account_id  = ? AND is_active = 1`,
+        [accountId]
+      );
     if (account.length === 0) {
       return res.status(404).send({ message: "Account not found." });
     }
@@ -287,7 +295,7 @@ const changePasswordAccount = async (req, res) => {
     const [result] = await db
       .promise()
       .query(
-        `UPDATE \`${dbName}\`.accounts SET password = ? WHERE account_id  = ?`,
+        `UPDATE \`${dbName}\`.accounts SET password = ? WHERE account_id  = ? AND is_active = 1`,
         [hashedPassword, accountId]
       );
 
@@ -299,6 +307,29 @@ const changePasswordAccount = async (req, res) => {
       return res.status(404).send({ message: "Account not found." });
     }
   } catch (error) {
+    return res.status(500).send(error);
+  }
+};
+
+const removeAccountFromWeb = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  const accountId = req.id;
+
+  try {
+    const [result] = await db.promise().query(
+      `UPDATE \`${dbName}\`.accounts 
+       SET is_active = 0  
+       WHERE account_id = ?`,
+      [accountId]
+    );
+
+    if (result.affectedRows > 0) {
+      return res.status(200).send("Account deleted successfully.");
+    } else {
+      return res.status(404).send("Account not found.");
+    }
+  } catch (error) {
+    console.error(error);
     return res.status(500).send(error);
   }
 };
@@ -330,5 +361,6 @@ module.exports = {
   getAccountByEmail,
   updateAccount,
   changePasswordAccount,
+  removeAccountFromWeb,
   deleteAccount,
 };
