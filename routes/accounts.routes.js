@@ -20,6 +20,8 @@ routerAccounts.put(
 
 routerAccounts.patch("/:id", accountsControllers.changePasswordAccount);
 
+routerAccounts.patch("/remove/:id", accountsControllers.removeAccountFromWeb);
+
 routerAccounts.delete("/:id", accountsControllers.deleteAccount);
 
 module.exports = routerAccounts;

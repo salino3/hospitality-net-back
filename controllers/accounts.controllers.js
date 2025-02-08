@@ -303,6 +303,29 @@ const changePasswordAccount = async (req, res) => {
   }
 };
 
+const removeAccountFromWeb = async (req, res) => {
+  const dbName = process.env.DB_NAME;
+  const accountId = req.params.id;
+
+  try {
+    const [result] = await db.promise().query(
+      `UPDATE \`${dbName}\`.accounts 
+       SET is_active = 0  
+       WHERE account_id = ?`,
+      [accountId]
+    );
+
+    if (result.affectedRows > 0) {
+      return res.status(200).send("Account deleted successfully.");
+    } else {
+      return res.status(404).send("Account not found.");
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send(error);
+  }
+};
+
 const deleteAccount = async (req, res) => {
   const dbName = process.env.DB_NAME;
   const userId = req.params.id;
@@ -330,5 +353,6 @@ module.exports = {
   getAccountByEmail,
   updateAccount,
   changePasswordAccount,
+  removeAccountFromWeb,
   deleteAccount,
 };
