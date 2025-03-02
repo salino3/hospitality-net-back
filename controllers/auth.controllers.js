@@ -82,7 +82,7 @@ const registerAccount = async (req, res) => {
 };
 
 const loginAccount = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password: psw } = req.body;
 
   db.promise()
     .query("SELECT * FROM accounts WHERE email = (?)", [email])
@@ -91,19 +91,24 @@ const loginAccount = async (req, res) => {
         return res.status(404).send("Email not found");
       }
 
-      const user = result[0][0];
-      const isPasswordValid = bcrypt.compareSync(password, user.password);
+      //
+      // const user = result[0][0];
+      const isPasswordValid = bcrypt.compareSync(psw, result[0][0].password);
       if (!isPasswordValid) {
         return res.status(401).send("Invalid password");
       }
+      //
+      const { password, ...account } = result[0][0];
 
       // Generate token
       const token = jwt.sign(
-        {
-          id: user.account_id,
-          email: user.email,
-          role_user: user.role_user,
-        },
+        // {
+        //   id: user.account_id,
+        //   email: user.email,
+        //   role_user: user.role_user,
+        // },
+        { id: account.account_id, ...account },
+
         process.env.SECRET_KEY,
         {
           expiresIn: "1h",
