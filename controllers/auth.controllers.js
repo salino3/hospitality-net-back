@@ -107,8 +107,7 @@ const loginAccount = async (req, res) => {
         //   email: user.email,
         //   role_user: user.role_user,
         // },
-        { id: account.account_id, ...account },
-
+        account,
         process.env.SECRET_KEY,
         {
           expiresIn: "1h",
