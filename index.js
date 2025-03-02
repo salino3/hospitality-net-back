@@ -21,7 +21,7 @@ app.use(
     origin:
       process.env.NODE_ENV === "production"
         ? process.env.FRONT_END_PORT
-        : "http://localhost:7300",
+        : "http://localhost:7700",
     credentials: true,
   })
 );
