@@ -99,6 +99,11 @@ const loginAccount = async (req, res) => {
       }
       //
       const { password, ...account } = result[0][0];
+      if (account.profile_picture) {
+        account.profile_picture = `${req.protocol}://${req.get(
+          "host"
+        )}/${account.profile_picture.replace(/\\/g, "/")}`;
+      }
 
       // Generate token
       const token = jwt.sign(
