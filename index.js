@@ -11,8 +11,6 @@ dotenv.config();
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
-// Serve static files (images, CSS, etc.)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const port = process.env.PORT || 5300;
 
@@ -25,6 +23,9 @@ app.use(
     credentials: true,
   })
 );
+
+// For static files (images, CSS, etc.)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/auth", routerAuth);
